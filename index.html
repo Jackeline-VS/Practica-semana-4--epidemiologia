@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Simulador de Transmisión de Epidemias</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="cabecera">
+      <h1>Simulador de transmisión de epidemias</h1>
+      <p>
+        Un modelo SIR sencillo hecho con JavaScript y Canvas: las personas se
+        mueven, se contagian y se recuperan. Guía Práctica Semana 04, IS093A.
+      </p>
+      <button id="btnContraste" class="btn" type="button" aria-pressed="false">
+        Alternar contraste
+      </button>
+    </header>
+
+    <main>
+      <!-- PASO 1 -->
+      <section class="paso" id="paso1">
+        <h2><span class="num">1</span> Estructura HTML, interfaz y canvas</h2>
+        <p>
+          En el modelo SIR cada persona está en un estado: susceptible (S),
+          infectada (I) o recuperada (R). Una persona infectada contagia a las
+          susceptibles que se le acercan y, pasados unos segundos, se recupera.
+          La interfaz usa solo HTML, CSS y un <code>&lt;canvas&gt;</code>; el
+          script se carga con <code>defer</code>. Escribe el nombre del brote
+          (por ejemplo, el virus) y aparece en letras de neón.
+        </p>
+        <ul class="leyenda">
+          <li class="s">Susceptible</li>
+          <li class="i">Infectada</li>
+          <li class="r">Recuperada</li>
+        </ul>
+        <div class="campo nombre">
+          <label for="inNombre">Nombre del brote</label>
+          <input
+            id="inNombre"
+            type="text"
+            maxlength="16"
+            placeholder="Ej. Gripe X"
+            autocomplete="off"
+          />
+        </div>
+        <canvas
+          id="neon"
+          width="640"
+          height="120"
+          aria-label="Nombre del brote en letras de neón"
+        ></canvas>
+        <div class="controles">
+          <button id="btnPlay" class="btn" type="button">Iniciar</button>
+          <button id="btnPause" class="btn" type="button">Pausar</button>
+          <button id="btnReset" class="btn" type="button">Reiniciar</button>
+          <label
+            >Velocidad
+            <input id="velocidad" type="range" min="20" max="200" value="60" />
+            <output id="velTxt">60</output></label
+          >
+        </div>
+        <canvas
+          id="sim"
+          width="640"
+          height="360"
+          aria-label="Simulación de personas susceptibles, infectadas y recuperadas"
+        ></canvas>
+        <p class="conteo">
+          Susceptibles <b id="cS">0</b> · Infectadas <b id="cI">0</b> ·
+          Recuperadas <b id="cR">0</b>
+        </p>
+      </section>
+
+      <!-- PASO 2 -->
+      <section class="paso" id="paso2">
+        <h2><span class="num">2</span> IIFE, closures y arrow functions</h2>
+        <p>
+          Todo el código vive dentro de una IIFE, así que no crea variables
+          globales. El estado de la simulación está guardado en un closure:
+          sigue disponible entre un frame y otro sin salir del scope. Los
+          handlers son arrow functions, que conservan el
+          <code>this</code> léxico. Con el botón puedes introducir un caso:
+          infecta a una persona susceptible y el closure suma uno al contador.
+        </p>
+        <div class="metricas">
+          <div>
+            <b id="mContador" class="grande">0</b
+            ><span>Casos introducidos</span>
+          </div>
+          <div><b id="mFrames">0</b><span>Frames simulados</span></div>
+          <div><b id="mClicks">0</b><span>Clics en total</span></div>
+          <div><b id="mUlt">—</b><span>Última acción</span></div>
+        </div>
+        <div class="controles">
+          <button id="btnMas" class="btn" type="button">
+            Introducir un caso
+          </button>
+          <button id="btnCero" class="btn" type="button">
+            Reiniciar contador
+          </button>
+        </div>
+      </section>
+
+      <!-- PASO 3 -->
+      <section class="paso" id="paso3">
+        <h2><span class="num">3</span> Manipulación del DOM y validación</h2>
+        <p>
+          Esta caja representa a una persona. Con
+          <code>classList.toggle()</code> y variables CSS cambia de estado sin
+          usar <code>style</code> inline: al contagiarla se pone roja y emite un
+          pulso que representa su radio de contagio; al recuperarla se pone
+          verde; en cuarentena se detiene. Marca "Persona en movimiento" para
+          que se desplace. Más abajo se validan los parámetros de la epidemia.
+        </p>
+        <div class="escenario">
+          <div id="caja" class="caja">Susceptible</div>
+        </div>
+        <div class="controles">
+          <label class="check"
+            ><input id="chkMover" type="checkbox" /> Persona en
+            movimiento</label
+          >
+          <button id="btnContagiar" class="btn" type="button">Contagiar</button>
+          <button id="btnRecuperar" class="btn" type="button">Recuperar</button>
+          <button id="btnAislar" class="btn" type="button">
+            Aislar en cuarentena
+          </button>
+          <button id="btnCajaReset" class="btn" type="button">
+            Restablecer
+          </button>
+        </div>
+        <div class="campo">
+          <label for="inN">Población (10 a 300 personas)</label>
+          <input id="inN" type="number" value="120" />
+        </div>
+        <div class="campo">
+          <label for="inR">Radio de contagio (5 a 40 px)</label>
+          <input id="inR" type="number" value="16" />
+        </div>
+        <div class="campo">
+          <label for="inRec">Tiempo de recuperación (2 a 20 segundos)</label>
+          <input id="inRec" type="number" value="6" />
+        </div>
+        <button id="btnAplicar" class="btn" type="button">
+          Aplicar y reiniciar
+        </button>
+        <p id="msg" aria-live="polite"></p>
+      </section>
+
+      <!-- PASO 4 -->
+      <section class="paso" id="paso4">
+        <h2><span class="num">4</span> Canvas API y requestAnimationFrame</h2>
+        <p>
+          La simulación avanza con <code>requestAnimationFrame</code> y delta
+          time, por lo que las personas se mueven igual en pantallas de 60 o 144
+          Hz. Abajo se dibuja la curva epidémica con <code>stroke</code>: la
+          línea roja sube cuando hay más infectados.
+        </p>
+        <canvas
+          id="curva"
+          width="640"
+          height="200"
+          aria-label="Curva epidémica"
+        ></canvas>
+        <p>Delta time del último cuadro: <b id="dtTxt">0</b> ms</p>
+      </section>
+
+      <!-- PASO 5 -->
+      <section class="paso" id="paso5">
+        <h2><span class="num">5</span> Depuración y optimización</h2>
+        <p>
+          Un monitor mide FPS, memoria y listeners activos. Al pausar se llama a
+          <code>cancelAnimationFrame</code>, y al cerrar la página se quitan
+          todos los listeners para evitar fugas.
+        </p>
+        <div class="metricas">
+          <div><b id="mFps">0</b><span>FPS actual</span></div>
+          <div><b id="mHeap">0</b><span>Memoria (MB)</span></div>
+          <div><b id="mList">0</b><span>Listeners activos</span></div>
+          <div><b id="rafEstado">detenido</b><span>Bucle rAF</span></div>
+        </div>
+        <canvas
+          id="fpsHist"
+          width="240"
+          height="60"
+          aria-label="Historial de FPS"
+        ></canvas>
+        <ul id="log"></ul>
+      </section>
+    </main>
+  </body>
+</html>
